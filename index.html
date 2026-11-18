@@ -402,15 +402,17 @@
     <div class="modal__icon" aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
     </div>
-    <h3 id="orderModalTitle">Заказ принят</h3>
-    <p class="modal__lead">Передали на кухню. Курьер приедет через 30–40 минут.</p>
+    <h3 id="orderModalTitle">Заказ готов</h3>
+    <p class="modal__lead">Открой WhatsApp — там уже готов текст заказа. Отправь его, и мы подтвердим доставку.</p>
     <div class="modal__summary" id="orderSummary"></div>
-    <button class="btn btn--dark btn--block" id="orderModalClose" type="button">Хорошо</button>
+    <a class="btn btn--dark btn--block" id="waSend" href="https://wa.me/77051855529" target="_blank" rel="noopener">Отправить в WhatsApp</a>
+    <button class="btn btn--light btn--block btn--small" id="waCopy" type="button">Скопировать текст заказа</button>
+    <button class="btn btn--light btn--block btn--small" id="orderModalClose" type="button">Закрыть</button>
   </div>
 </div>
 
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
-<script src="app.js"></script>
+<script src="app.js?v=2"></script>
 </body>
 </html>

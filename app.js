@@ -622,6 +622,37 @@
   const orderModalClose = $('#orderModalClose');
   if (orderModalClose) orderModalClose.addEventListener('click', closeOrderModal);
 
+  function legacyCopy(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.top = '-1000px';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy');
+      toast('Текст заказа скопирован');
+    } catch (e) {
+      toast('Не получилось скопировать', 'error');
+    }
+    ta.remove();
+  }
+
+  const waCopyBtn = $('#waCopy');
+  if (waCopyBtn) {
+    waCopyBtn.addEventListener('click', () => {
+      const text = waCopyBtn.dataset.text || '';
+      if (!text) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text)
+          .then(() => toast('Текст заказа скопирован'))
+          .catch(() => legacyCopy(text));
+      } else {
+        legacyCopy(text);
+      }
+    });
+  }
+
   const orderModal = $('#orderModal');
   if (orderModal) {
     orderModal.addEventListener('click', e => {
@@ -717,6 +748,35 @@
       const totals = getTotals();
       const orderNo = 'K-' + (1000 + Math.floor(Math.random() * 9000));
       const address = addrEl.value.trim();
+      const customerName = nameEl.value.trim();
+      const customerPhone = phoneEl.value.trim();
+      const commentEl = $('#fComment');
+      const comment = commentEl ? commentEl.value.trim() : '';
+
+      const lines = [];
+      lines.push('Новый заказ Ketchunez №' + orderNo);
+      lines.push('');
+      Object.keys(cart).forEach(function (k) {
+        const it = cart[k];
+        lines.push('• ' + it.name + (it.meta ? ' (' + it.meta + ')' : '') + ' × ' + it.qty + ' = ' + money(it.unit * it.qty));
+      });
+      lines.push('');
+      lines.push('Товары: ' + money(totals.sub));
+      if (promo && totals.discount > 0) lines.push('Промокод ' + promo.code + ': −' + money(totals.discount));
+      lines.push('Доставка: ' + (totals.delivery === 0 ? 'бесплатно' : money(totals.delivery)));
+      lines.push('ИТОГО: ' + money(totals.total));
+      lines.push('');
+      lines.push('Имя: ' + customerName);
+      lines.push('Тел: ' + customerPhone);
+      lines.push('Адрес: ' + address);
+      lines.push('Оплата: ' + PAYMENT_LABELS[payment]);
+      if (comment) lines.push('Комментарий: ' + comment);
+      const waText = lines.join('\n');
+      const waLink = 'https://wa.me/77051855529?text=' + encodeURIComponent(waText);
+      const waSend = $('#waSend');
+      if (waSend) waSend.href = waLink;
+      const waCopy = $('#waCopy');
+      if (waCopy) waCopy.dataset.text = waText;
 
       const summary = $('#orderSummary');
       if (summary) {
@@ -742,7 +802,7 @@
       renderPromo();
       closeCart();
       openOrderModal();
-      toast('Заказ отправлен на кухню');
+      toast('Заказ готов — отправь его в WhatsApp');
     });
   }
 
