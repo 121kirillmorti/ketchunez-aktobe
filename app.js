@@ -17,6 +17,11 @@
     if (b === 1) return forms[0];
     return forms[2];
   };
+  const I18N = window.I18N;
+  const tr = s => (I18N ? I18N.t(s) : s);
+  const refreshI18n = () => { if (I18N) I18N.apply(document.body); };
+  let redrawWheel = null;
+
   const pad2 = n => (n < 10 ? '0' : '') + n;
   const todayKey = () => {
     const d = new Date();
@@ -40,7 +45,7 @@
     if (!wrap) return;
     const el = document.createElement('div');
     el.className = 'toast' + (type ? ' toast--' + type : '');
-    el.textContent = msg;
+    el.textContent = tr(msg);
     wrap.appendChild(el);
     setTimeout(() => {
       el.classList.add('out');
@@ -223,6 +228,7 @@
     if (!menuGrid) return;
     const list = PRODUCTS.filter(p => activeCat === 'all' || p.cat === activeCat);
     menuGrid.innerHTML = list.map(cardHTML).join('');
+    refreshI18n();
   }
 
   function refreshCard(id) {
@@ -376,11 +382,11 @@
 
     if (hint) {
       if (t.sub === 0) {
-        hint.innerHTML = 'Бесплатная доставка от <b>4 000 ₸</b>';
+        hint.innerHTML = tr('Бесплатная доставка от <b>4 000 ₸</b>');
       } else if (t.delivery === 0) {
-        hint.innerHTML = '<b>Доставка бесплатно</b>';
+        hint.innerHTML = '<b>' + tr('Доставка бесплатно') + '</b>';
       } else {
-        hint.innerHTML = 'До бесплатной доставки: <b>' + money(4000 - t.sub) + '</b>';
+        hint.innerHTML = tr('До бесплатной доставки: ') + '<b>' + money(4000 - t.sub) + '</b>';
       }
     }
   }
@@ -402,15 +408,16 @@
     if (form) form.classList.toggle('hidden', empty);
     if (checkout) {
       checkout.disabled = empty;
-      checkout.textContent = empty ? 'Корзина пуста' : 'Оформить заказ';
+      checkout.textContent = empty ? tr('Корзина пуста') : tr('Оформить заказ');
     }
     if (hint) {
-      hint.textContent = empty ? 'Пока пусто' : cartCount() + ' ' + plural(cartCount(), ['товар', 'товара', 'товаров']) + ' в корзине';
+      hint.textContent = empty ? tr('Пока пусто') : cartCount() + ' ' + tr(plural(cartCount(), ['товар', 'товара', 'товаров'])) + ' ' + tr('в корзине');
     }
 
     updateTotals();
     updateBadge();
     saveCart();
+    refreshI18n();
     firstCartRender = false;
   }
 
@@ -456,7 +463,7 @@
 
     renderCart();
     bumpCart();
-    toast(p.name + ' — в корзине');
+    toast(p.name + ' ' + tr('— в корзине'));
   }
 
   function changeQty(key, delta) {
@@ -510,10 +517,11 @@
 
     if (activeBox) activeBox.classList.toggle('hidden', !isActive);
     if (hint) hint.classList.toggle('hidden', isActive);
-    if (label && promo) label.textContent = promo.code + ' — ' + promo.label;
+    if (label && promo) label.textContent = promo.code + ' — ' + tr(promo.label);
     if (input && promo) input.value = promo.code;
 
     updateTotals();
+    refreshI18n();
   }
 
   function applyPromo(code) {
@@ -530,7 +538,7 @@
     promo = found;
     saveCart();
     renderPromo();
-    toast('Промокод ' + c + ' применён: ' + found.label);
+    toast('Промокод ' + c + ' ' + tr('применён') + ': ' + tr(found.label));
     return true;
   }
 
@@ -786,6 +794,7 @@
           '<div><span>Оплата</span><b>' + PAYMENT_LABELS[payment] + '</b></div>' +
           '<div><span>Адрес</span><b>' + esc(address) + '</b></div>' +
           '<div><span>Время</span><b>30–40 минут</b></div>';
+        refreshI18n();
       }
 
       cart = {};
@@ -1170,16 +1179,16 @@
 
       if (score >= 150) {
         prizeCode = 'GAME10';
-        if (el.endTitle) el.endTitle.textContent = 'Ты выиграл скидку';
-        if (el.endText) el.endText.textContent = 'Очков: ' + score + '. Промокод даёт −10% на весь заказ.';
+        if (el.endTitle) el.endTitle.textContent = tr('Ты выиграл скидку');
+        if (el.endText) el.endText.textContent = tr('Очков: ') + score + '. ' + tr('Промокод даёт −10% на весь заказ.');
       } else if (score >= 80) {
         prizeCode = 'WHEEL5';
-        if (el.endTitle) el.endTitle.textContent = 'Есть скидка';
-        if (el.endText) el.endText.textContent = 'Очков: ' + score + '. Промокод даёт −5% на заказ.';
+        if (el.endTitle) el.endTitle.textContent = tr('Есть скидка');
+        if (el.endText) el.endText.textContent = tr('Очков: ') + score + '. ' + tr('Промокод даёт −5% на заказ.');
       } else {
         prizeCode = null;
-        if (el.endTitle) el.endTitle.textContent = 'Почти получилось';
-        if (el.endText) el.endText.textContent = 'Очков: ' + score + '. Нужно 80+ для скидки — попробуй ещё.';
+        if (el.endTitle) el.endTitle.textContent = tr('Почти получилось');
+        if (el.endText) el.endText.textContent = tr('Очков: ') + score + '. ' + tr('Нужно 80+ для скидки — попробуй ещё.');
       }
 
       if (el.prize) {
@@ -1311,7 +1320,7 @@
         ctx.textBaseline = 'middle';
         ctx.fillStyle = p.fg;
         ctx.font = '600 15px Inter, sans-serif';
-        ctx.fillText(p.short, R - 24, 0);
+        ctx.fillText(tr(p.short), R - 24, 0);
         ctx.restore();
       }
 
@@ -1343,17 +1352,17 @@
       const last = store.get('kv_spin_prize', '');
       if (usedToday) {
         note.textContent = last
-          ? 'Сегодняшний приз: ' + last + '. Возвращайся завтра.'
-          : 'Сегодня уже крутили. Возвращайся завтра.';
+          ? tr('Сегодняшний приз: ') + tr(last) + tr('. Возвращайся завтра.')
+          : tr('Сегодня уже крутили. Возвращайся завтра.');
         if (spinBtn) {
           spinBtn.disabled = true;
-          spinBtn.textContent = 'Приходи завтра';
+          spinBtn.textContent = tr('Приходи завтра');
         }
       } else {
-        note.textContent = '1 бесплатное вращение в день';
+        note.textContent = tr('1 бесплатное вращение в день');
         if (spinBtn) {
           spinBtn.disabled = false;
-          spinBtn.textContent = 'Крутить колесо';
+          spinBtn.textContent = tr('Крутить колесо');
         }
       }
     }
@@ -1361,8 +1370,8 @@
     function showResult(p) {
       pendingCode = p.code;
       const info = PROMOS[p.code];
-      if (wheelTitle) wheelTitle.textContent = 'Твой приз';
-      if (wheelText) wheelText.textContent = info.label + '. Промокод готов — примени его в корзине.';
+      if (wheelTitle) wheelTitle.textContent = tr('Твой приз');
+      if (wheelText) wheelText.textContent = tr(info.label) + '. ' + tr('Промокод готов — примени его в корзине.');
       if (wheelCode) wheelCode.textContent = p.code;
       if (overlay) overlay.classList.remove('hidden');
     }
@@ -1423,6 +1432,7 @@
       });
     }
 
+    redrawWheel = draw;
     setUsedNote();
     draw();
     if (document.fonts && document.fonts.ready) {
@@ -1459,6 +1469,15 @@
   initReveal();
   initArcade();
   initWheel();
+  refreshI18n();
+
+  document.addEventListener('i18n:lang', () => {
+    renderMenu();
+    renderCart();
+    renderPromo();
+    if (redrawWheel) redrawWheel();
+    refreshI18n();
+  });
 
   document.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;
